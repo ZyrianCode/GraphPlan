@@ -1,0 +1,43 @@
+
+template<typename... Ttypes> struct Tuple;
+
+template<>
+struct Tuple<> {};
+
+template<typename Tfirst, typename... Rest>
+struct Tuple<Tfirst, Rest...> : public Tuple<Rest...> { Tfirst value; };
+
+template<size_t index, typename Ttuple> struct Element;
+
+template<typename Tfirst, typename... Rest>
+struct Element<0, Tuple<Tfirst, Rest...>> {
+    using Type_t = Tfirst;
+    using TupleType_t = Tuple<Type_t, Rest...>;
+};
+
+template<size_t index, typename Tfirst, typename... Rest>
+struct Element<index, Tuple<Tfirst, Rest...>> : public Element<index - 1, Tuple<Rest...>>
+{};
+
+template<size_t index, typename... Ttypes>
+typename Element<index, Tuple<Ttypes...>>::Type_t&
+Get(Tuple<Ttypes...>& tuple) {
+    using TupleType_t = typename Element<index, Tuple<Ttypes...>>::TupleType_t;
+    return static_cast<TupleType_t&>(tuple).value;
+}
+
+template<size_t index, typename Ttuple>
+void FillTuple(Ttuple& tuple) {}
+
+template<size_t index, typename Ttuple, typename Tfirst, typename... Rest>
+void FillTuple(Ttuple& tuple, const Tfirst& first, const Rest&... rest) {
+    Get<index>(tuple) = first;
+    FillTuple<index + 1>(tuple, rest...);
+}
+
+template<typename... Ttypes>
+Tuple<Ttypes...> MakeTuple(const Ttypes&... args) {
+    Tuple<Ttypes...> result;
+    FillTuple<0>(result, args...);
+    return result;
+}

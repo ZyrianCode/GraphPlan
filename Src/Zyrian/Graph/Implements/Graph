@@ -1,0 +1,53 @@
+#include "Src/Zyrian/Graph/Defines/Graph.h"
+
+template<typename T>
+Graph<T>::Graph(){}
+
+template<typename T>
+Graph<T>::Graph(T VertexCount)
+{
+    this->VertexCount = VertexCount;
+    adjacencyMatrix = new list<T>[VertexCount];
+}
+
+template<typename T>
+void Graph<T>::TopologicalSortUtil(T v, bool visited[], stack<T>& Stack)
+{
+    visited[v] = true;
+
+    list<int>::iterator it;
+    for (it = adjacencyMatrix[v].begin(); it != adjacencyMatrix[v].end(); ++it) {
+        if (!visited[*it]) TopologicalSortUtil(*it, visited, Stack);
+    }
+    Stack.push(v); // Добавляем текущую вершину в стек
+}
+
+
+template<typename T>
+void Graph<T>::addEdge(T v, T w)
+{
+    adjacencyMatrix[v].push_back(w);
+}
+
+template<typename T>
+void Graph<T>::TopologicalSort()
+{
+    stack<int> Stack;
+
+    // Помечаем все вершины как непосещенные
+    bool* visited = new bool[VertexCount];
+    for (int i = 0; i < VertexCount; i++) visited[i] = false;
+
+    
+    for (int i = 0; i < VertexCount; i++) {
+        if (visited[i] == false) TopologicalSortUtil(i, visited, Stack); // Вызываем рекурсивную функцию для поиска топологической сортировки для каждой вершины
+
+    }
+    // Вывоl результирующего стека
+    while (Stack.empty() == false)
+    {
+        cout << Stack.top() << " ";
+        Stack.pop();
+    }
+}
+
